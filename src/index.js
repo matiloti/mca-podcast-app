@@ -1,13 +1,26 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Podcast } from './routes/Podcast';
+import { Episode } from './routes/Episode';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { Header } from './components/Header';
+import { Home } from './routes/Home';
 
-const root = createRoot(document.getElementById('root'));
-root.render(
+createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Header/>
+        <Routes>
+          <Route path="/" element={<Home/>}/>
+          <Route path="/podcast/:podcastId" element={<Podcast/>}/>
+          <Route path="/podcast/:podcastId/episode/:episodeId" element={<Episode/>}/>
+        </Routes>
+      </BrowserRouter>
+    </ErrorBoundary>
   </React.StrictMode>
 );
 
