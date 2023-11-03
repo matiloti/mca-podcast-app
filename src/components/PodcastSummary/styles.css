@@ -76,4 +76,7 @@
     
     font-style: italic;
     font-size: 0.8rem;
+    
+    word-wrap:break-word;
+    word-break: break-all;
 }
