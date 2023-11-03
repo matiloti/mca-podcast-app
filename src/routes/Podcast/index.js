@@ -1,9 +1,9 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import './styles.css';
 import { PodcastSummary } from "../../components/PodcastSummary";
 import { Link } from "react-router-dom";
+import { fetchHundredMostPopularPodcasts } from "../../services/podcast";
 
 export const Podcast = () => {
 
@@ -49,29 +49,30 @@ export const Podcast = () => {
     });
 
     useEffect(() => {
-        axios.get('https://itunes.apple.com/us/rss/toppodcasts/limit=100/genre=1310/json')
-        .then(response => {
-            let podcastResponse =
+        fetchHundredMostPopularPodcasts()
+            .then(response => {
+                let podcastResponse =
                 response.data.feed.entry.filter(podcastElement => 
                     podcastElement.id.attributes['im:id'] == podcastId
                 )[0];
             
-            setPodcast(podcast => ({
-                ...podcast,
-                id: podcastResponse.id.attributes['im:id'],
-                title: podcastResponse['im:name'].label,
-                author: podcastResponse['im:artist'].label,
-                description: podcastResponse['summary'].label,
-                image: podcastResponse['im:image'][podcastResponse['im:image'].length -1].label,
-            }));
-        })
-        .catch(error => {
-            console.log(error);
-        })
-
+                setPodcast(podcast => ({
+                    ...podcast,
+                    id: podcastResponse.id.attributes['im:id'],
+                    title: podcastResponse['im:name'].label,
+                    author: podcastResponse['im:artist'].label,
+                    description: podcastResponse['summary'].label,
+                    image: podcastResponse['im:image'][podcastResponse['im:image'].length -1].label,
+                }));
+            })
+            .catch(error => {
+                console.log(error);
+            })
+            
         /**
          * Response structure does not contain episodes data
          */
+
         // axios.get(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://itunes.apple.com/lookup?id=${podcastId}`)}`)
         // .then(response => {
         //     console.log(JSON.parse(response.data.contents));
