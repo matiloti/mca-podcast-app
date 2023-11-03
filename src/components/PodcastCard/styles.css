@@ -1,0 +1,68 @@
+.podcastCard-wrapper {
+    text-decoration: none;
+    color: black;
+}
+
+.podcastCard {
+    width: 12rem;
+    min-height: 5rem;
+    max-height: 100rem;
+
+    margin: 0;
+    margin-bottom: 5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding-bottom: 0.8rem;
+
+    box-shadow: 0px 4px 9px 0px lightgray;
+    transition: filter ease-in-out 0.2s;
+}
+
+.podcastCard:hover {
+    filter: brightness(0.8);
+    cursor: pointer;
+}
+
+.podcastCard__icon-wrapper {
+    width: 100%;
+    height: 4rem;
+    position: relative;
+}
+
+.podcastCard__icon {
+    width: 6rem;
+    height: auto;
+    border-radius: 50%;
+    position: absolute;
+    top: -50%;  
+    left: 50%; 
+    transform: translate(-50%, 0);
+}
+
+.podcastCard__title {
+    width: 100%;
+
+    margin-top: 0.5rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 0.9rem;
+    text-align: center;
+    font-weight: bold;
+}
+
+.podcastCard__author {
+    width: 100%;
+
+    margin-top: 0.5rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    font-size: 0.7rem;
+    text-align: center;
+    color: gray;
+}
