@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 export const PodcastCard = (props) => {
     return (
-        <Link to={`/podcasts/${props.id}`} className="podcastCard-wrapper">
+        <Link to={`/podcast/${props.id}`} className="podcastCard-wrapper">
             <div className="podcastCard">
                 <div className="podcastCard__icon-wrapper">
                     <img src={props.icon} alt={`Logo from ${props.title}`} className="podcastCard__icon"/>
