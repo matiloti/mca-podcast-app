@@ -13,7 +13,6 @@ const fetchEpisodesMock = (episodeId) => {
 }
 
 const fetchEpisodeFromPodcast = (podcastId, episodeId) => {
-    console.log(episodeId);
     return fetchEpisodesMock(episodeId);
 };
 

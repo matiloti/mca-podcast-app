@@ -1,28 +1,47 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { PodcastCard } from "../../components/PodcastCard";
 import './styles.css';
+import { fetchHundredMostPopularPodcasts } from "../../services/podcast";
 
 export const Home = () => {
 
-    const [podcastList, setPodcastList] = useState([]);
-    const [filteredPodcastList, setFilteredPodcastList] = useState([]);
+    const [podcastList, setPodcastList] = useState(JSON.parse(localStorage.getItem('podcastList')) || []);
+    const [filteredPodcastList, setFilteredPodcastList] = useState(JSON.parse(localStorage.getItem('podcastList')) || []);
     const [filterText, setFilterText] = useState(null);
 
     useEffect(() => {
-        axios.get('https://itunes.apple.com/us/rss/toppodcasts/limit=100/genre=1310/json')
-        .then(response => {
-            setPodcastList(response.data.feed.entry);
-            setFilteredPodcastList(response.data.feed.entry);
-        })
-        .catch(error => {
-            console.log(error);
-        })
+        const lastFetchTime = localStorage.getItem('lastFetchTime');
+        const dayInMilisecconds = 24 * 60 * 60 * 1000;
+        if(!lastFetchTime || (Date.now() - lastFetchTime > dayInMilisecconds)) {
+            fetchHundredMostPopularPodcasts()
+            .then(response => {
+                setPodcastList(response.data.feed.entry);
+                setFilteredPodcastList(response.data.feed.entry);
+                localStorage.setItem('podcastList', JSON.stringify(response.data.feed.entry));
+                localStorage.setItem('lastFetchTime', Date.now());
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        }
     }, []);
 
     useEffect(() => {
+        const podcastFilterHandler = (podcast) => {
+            let filterTextPresent = filterText !== null && filterText !== undefined;
+            let filterTextMatchesName = false;
+            let filterTextMatchesAuthor = false;
+    
+            if(filterTextPresent) {
+                filterTextMatchesName = podcast['im:name'].label.toLowerCase().includes(filterText);
+                filterTextMatchesAuthor = podcast['im:artist'].label.includes(filterText);
+            }
+    
+            return !filterTextPresent || filterTextMatchesName || filterTextMatchesAuthor;
+        }
+
         setFilteredPodcastList(podcastList.filter(podcastFilterHandler));
-    }, [filterText]);
+    }, [podcastList, filterText]);
 
     const handleFilterChange = (e) => {
         e.preventDefault();
@@ -31,19 +50,6 @@ export const Home = () => {
         } else {
             setFilterText(e.target.value.toLowerCase());
         }
-    }
-
-    const podcastFilterHandler = (podcast) => {
-        let filterTextPresent = filterText !== null && filterText !== undefined;
-        let filterTextMatchesName = false;
-        let filterTextMatchesAuthor = false;
-
-        if(filterTextPresent) {
-            filterTextMatchesName = podcast['im:name'].label.toLowerCase().includes(filterText);
-            filterTextMatchesAuthor = podcast['im:artist'].label.includes(filterText);
-        }
-
-        return !filterTextPresent || filterTextMatchesName || filterTextMatchesAuthor;
     }
 
     return (

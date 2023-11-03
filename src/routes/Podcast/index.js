@@ -3,45 +3,30 @@ import { useParams } from "react-router";
 import './styles.css';
 import { PodcastSummary } from "../../components/PodcastSummary";
 import { Link } from "react-router-dom";
-import { fetchHundredMostPopularPodcasts } from "../../services/podcast";
-import { episodesMock } from "../../resources/test/episodesMock";
+import { fetchPodcast } from "../../services/podcast";
+import { parsePodcast } from "../../utils/common";
 
 export const Podcast = () => {
 
     const { podcastId } = useParams();
-    const [podcast, setPodcast] = useState({
-        id: null,
-        title: "",
-        author: "",
-        description: "",
-        image: null,
-        episodes: []
-    });
+    const [podcast, setPodcast] = useState(parsePodcast(JSON.parse(localStorage.getItem(`podcast${podcastId}`))));
 
     useEffect(() => {
-        fetchHundredMostPopularPodcasts()
-            .then(response => {
-                let podcastResponse =
-                response.data.feed.entry.filter(podcastElement => 
-                    podcastElement.id.attributes['im:id'] == podcastId
-                )[0];
-            
-                setPodcast(podcast => ({
-                    ...podcast,
-                    id: podcastResponse.id.attributes['im:id'],
-                    title: podcastResponse['im:name'].label,
-                    author: podcastResponse['im:artist'].label,
-                    description: podcastResponse['summary'].label,
-                    image: podcastResponse['im:image'][podcastResponse['im:image'].length -1].label,
-                    episodes: episodesMock
-                }));
-            })
-            .catch(error => {
-                console.log(error);
-            })
-            
+        const lastFetchTime = localStorage.getItem(`podcast${podcastId}_lastFetchTime`);
+        const dayInMilisecconds = 24 * 60 * 60 * 1000;
+        if(!lastFetchTime || (Date.now() - lastFetchTime > dayInMilisecconds)) {
+            fetchPodcast(podcastId)
+                .then(response => {
+                    localStorage.setItem(`podcast${podcastId}`, JSON.stringify(response));
+                    localStorage.setItem(`podcast${podcastId}_lastFetchTime`, Date.now());
+                    setPodcast(parsePodcast(response));
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        }
         /**
-         * Response structure does not contain episodes data
+         * Response structure does not contain episodes data and no information about description
          */
 
         // axios.get(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://itunes.apple.com/lookup?id=${podcastId}`)}`)
@@ -55,10 +40,6 @@ export const Podcast = () => {
         //     console.log(error);
         // })
     }, [podcastId]);
-
-    useEffect(() => {
-        console.log(podcast);
-    }, [podcast]);
 
     return (
         <div className="podcast">
