@@ -1,48 +1,42 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { PodcastSummary } from "../../components/PodcastSummary";
-import { fetchHundredMostPopularPodcasts } from "../../services/podcast";
+import { fetchPodcast } from "../../services/podcast";
 import { fetchEpisodeFromPodcast } from "../../services/episode";
 import './styles.css';
+import { parseEpisode, parsePodcast } from "../../utils/common";
 
 export const Episode = () => {
 
     const { podcastId, episodeId } = useParams();
-    const [ podcast, setPodcast ] = useState({});
-    const [ episode, setEpisode ] = useState(
-        {
-            id: null,
-            title: '',
-            date: '',
-            duration: ''
-        }
-    );
+    const [podcast, setPodcast] = useState(parsePodcast(JSON.parse(localStorage.getItem(`podcast${podcastId}`))));
+    const [ episode, setEpisode ] = useState(parseEpisode(JSON.parse(localStorage.getItem(`podcast${podcastId}_episode${episodeId}`))));
 
     useEffect(() => {
-        Promise.all([
-            fetchEpisodeFromPodcast(podcastId, episodeId), 
-            fetchHundredMostPopularPodcasts()
-        ])
-            .then(values => {
-                let podcastResponse =
-                values[1].data.feed.entry.filter(podcastElement => 
-                    podcastElement.id.attributes['im:id'] == podcastId
-                )[0];
-            
-                setPodcast(podcast => ({
-                    ...podcast,
-                    id: podcastResponse.id.attributes['im:id'],
-                    title: podcastResponse['im:name'].label,
-                    author: podcastResponse['im:artist'].label,
-                    description: podcastResponse['summary'].label,
-                    image: podcastResponse['im:image'][podcastResponse['im:image'].length -1].label,
-                }));
+        const dayInMilisecconds = 24 * 60 * 60 * 1000;
 
-                setEpisode(values[0]);
-            })
-            .catch(error => {
-                console.log(error);
-            })
+        const lastFetchTimeEpisode = localStorage.getItem(`podcast${podcastId}_episode${episodeId}_lastFetchTime`);
+        if(!lastFetchTimeEpisode || (Date.now() - lastFetchTimeEpisode > dayInMilisecconds)) {
+            fetchEpisodeFromPodcast(podcastId, episodeId)
+                .then(response => {
+                    localStorage.setItem(`podcast${podcastId}_episode${episodeId}`, JSON.stringify(response));
+                    localStorage.setItem(`podcast${podcastId}_episode${episodeId}_lastFetchTime`, Date.now());
+                    setEpisode(response);
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        }
+
+        const lastFetchTimePodcast = localStorage.getItem(`podcast${podcastId}_lastFetchTime`);
+        if(!lastFetchTimePodcast || (Date.now() - lastFetchTimePodcast > dayInMilisecconds)) {
+            fetchPodcast(podcastId)
+                .then(response => {
+                    localStorage.setItem(`podcast${podcastId}`, JSON.stringify(response));
+                    localStorage.setItem(`podcast${podcastId}_lastFetchTime`, Date.now());
+                    setPodcast(parsePodcast(response));
+                })
+        }
     }, [podcastId, episodeId]);
 
     return (
