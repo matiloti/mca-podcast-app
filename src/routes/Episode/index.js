@@ -5,18 +5,21 @@ import { fetchPodcast } from "../../services/podcast";
 import { fetchEpisodeFromPodcast } from "../../services/episode";
 import './styles.css';
 import { parseEpisode, parsePodcast } from "../../utils/common";
+import { useLoading } from "../../context/loadingContext";
 
 export const Episode = () => {
 
     const { podcastId, episodeId } = useParams();
     const [podcast, setPodcast] = useState(parsePodcast(JSON.parse(localStorage.getItem(`podcast${podcastId}`))));
     const [ episode, setEpisode ] = useState(parseEpisode(JSON.parse(localStorage.getItem(`podcast${podcastId}_episode${episodeId}`))));
+    const { setLoading } = useLoading();
 
     useEffect(() => {
         const dayInMilisecconds = 24 * 60 * 60 * 1000;
 
         const lastFetchTimeEpisode = localStorage.getItem(`podcast${podcastId}_episode${episodeId}_lastFetchTime`);
         if(!lastFetchTimeEpisode || (Date.now() - lastFetchTimeEpisode > dayInMilisecconds)) {
+            setLoading(loading => loading + 1);
             fetchEpisodeFromPodcast(podcastId, episodeId)
                 .then(response => {
                     localStorage.setItem(`podcast${podcastId}_episode${episodeId}`, JSON.stringify(response));
@@ -25,19 +28,29 @@ export const Episode = () => {
                 })
                 .catch(error => {
                     console.log(error);
+                })
+                .finally(_ => {
+                    setLoading(loading => loading - 1);
                 });
         }
 
         const lastFetchTimePodcast = localStorage.getItem(`podcast${podcastId}_lastFetchTime`);
         if(!lastFetchTimePodcast || (Date.now() - lastFetchTimePodcast > dayInMilisecconds)) {
+            setLoading(loading => loading + 1);
             fetchPodcast(podcastId)
                 .then(response => {
                     localStorage.setItem(`podcast${podcastId}`, JSON.stringify(response));
                     localStorage.setItem(`podcast${podcastId}_lastFetchTime`, Date.now());
                     setPodcast(parsePodcast(response));
                 })
+                .catch(error => {
+                    console.log(error);
+                })
+                .finally(_ => {
+                    setLoading(loading => loading - 1);
+                });
         }
-    }, [podcastId, episodeId]);
+    }, [podcastId, episodeId, setLoading]);
 
     return (
         <div className="episode">
