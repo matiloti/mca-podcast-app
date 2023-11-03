@@ -1,0 +1,28 @@
+.episode {
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+
+    margin: 1rem;
+}
+
+.episode__details {
+    min-height: 1rem;
+    max-height: 100rem;
+
+    margin-left: 2rem;
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+
+    box-shadow: 0px 4px 9px 0px lightgray;
+
+    border-radius: 0.3rem;
+}
+
+.episode__details h2 {
+    margin: 0;
+}
+
+.episode__details audio {
+    width: 100%;
+    margin: 0;
+}
