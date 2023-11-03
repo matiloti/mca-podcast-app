@@ -5,16 +5,19 @@ import { PodcastSummary } from "../../components/PodcastSummary";
 import { Link } from "react-router-dom";
 import { fetchPodcast } from "../../services/podcast";
 import { parsePodcast } from "../../utils/common";
+import { useLoading } from "../../context/loadingContext";
 
 export const Podcast = () => {
 
     const { podcastId } = useParams();
     const [podcast, setPodcast] = useState(parsePodcast(JSON.parse(localStorage.getItem(`podcast${podcastId}`))));
+    const { setLoading } = useLoading();
 
     useEffect(() => {
         const lastFetchTime = localStorage.getItem(`podcast${podcastId}_lastFetchTime`);
         const dayInMilisecconds = 24 * 60 * 60 * 1000;
         if(!lastFetchTime || (Date.now() - lastFetchTime > dayInMilisecconds)) {
+            setLoading(loading => loading + 1);
             fetchPodcast(podcastId)
                 .then(response => {
                     localStorage.setItem(`podcast${podcastId}`, JSON.stringify(response));
@@ -23,6 +26,9 @@ export const Podcast = () => {
                 })
                 .catch(error => {
                     console.log(error);
+                })
+                .finally(_ => {
+                    setLoading(loading => loading - 1);
                 });
         }
         /**
@@ -39,7 +45,7 @@ export const Podcast = () => {
         // .catch(error => {
         //     console.log(error);
         // })
-    }, [podcastId]);
+    }, [podcastId, setLoading]);
 
     return (
         <div className="podcast">

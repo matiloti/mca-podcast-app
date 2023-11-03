@@ -2,17 +2,20 @@ import React, { useEffect, useState } from "react";
 import { PodcastCard } from "../../components/PodcastCard";
 import './styles.css';
 import { fetchHundredMostPopularPodcasts } from "../../services/podcast";
+import { useLoading } from "../../context/loadingContext";
 
 export const Home = () => {
 
     const [podcastList, setPodcastList] = useState(JSON.parse(localStorage.getItem('podcastList')) || []);
     const [filteredPodcastList, setFilteredPodcastList] = useState(JSON.parse(localStorage.getItem('podcastList')) || []);
     const [filterText, setFilterText] = useState(null);
+    const { setLoading } = useLoading();
 
     useEffect(() => {
         const lastFetchTime = localStorage.getItem('lastFetchTime');
         const dayInMilisecconds = 24 * 60 * 60 * 1000;
         if(!lastFetchTime || (Date.now() - lastFetchTime > dayInMilisecconds)) {
+            setLoading(loading => loading + 1);
             fetchHundredMostPopularPodcasts()
             .then(response => {
                 setPodcastList(response.data.feed.entry);
@@ -22,9 +25,12 @@ export const Home = () => {
             })
             .catch(error => {
                 console.log(error);
+            })
+            .finally(_ => {
+                setLoading(loading => loading - 1);
             });
         }
-    }, []);
+    }, [setLoading]);
 
     useEffect(() => {
         const podcastFilterHandler = (podcast) => {
