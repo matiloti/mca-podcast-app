@@ -4,6 +4,7 @@ import './styles.css';
 import { PodcastSummary } from "../../components/PodcastSummary";
 import { Link } from "react-router-dom";
 import { fetchHundredMostPopularPodcasts } from "../../services/podcast";
+import { episodesMock } from "../../resources/test/episodesMock";
 
 export const Podcast = () => {
 
@@ -14,38 +15,7 @@ export const Podcast = () => {
         author: "",
         description: "",
         image: null,
-        episodes: [
-            {
-                id: 1,
-                title: "one",
-                date: '1/3/2016',
-                duration: '14.00'
-            },
-            {
-                id: 2,
-                title: "two",
-                date: '1/4/2016',
-                duration: '11.20'
-            },
-            {
-                id: 3,
-                title: "three",
-                date: '1/5/2016',
-                duration: '19.45'
-            },
-            {
-                id: 4,
-                title: "four",
-                date: '1/6/2016',
-                duration: '16.03'
-            },
-            {
-                id: 5,
-                title: "five",
-                date: '1/7/2016',
-                duration: '15.37'
-            },
-        ]
+        episodes: []
     });
 
     useEffect(() => {
@@ -63,6 +33,7 @@ export const Podcast = () => {
                     author: podcastResponse['im:artist'].label,
                     description: podcastResponse['summary'].label,
                     image: podcastResponse['im:image'][podcastResponse['im:image'].length -1].label,
+                    episodes: episodesMock
                 }));
             })
             .catch(error => {
@@ -104,7 +75,7 @@ export const Podcast = () => {
                     </div>
                     {
                         podcast.episodes.map(episode => 
-                            <div className="podcast__episodes-row-wrapper">
+                            <div key={`${podcast.id}${episode.id}`} className="podcast__episodes-row-wrapper">
                                 <div><Link to={`/podcast/${podcastId}/episode/${episode.id}`} className="podcast__episodes-link">{episode.title}</Link></div>
                                 <div>{episode.date}</div>
                                 <div>{episode.duration}</div>
