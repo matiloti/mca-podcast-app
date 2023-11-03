@@ -45,7 +45,8 @@ module.exports = (env, argv) => {
             client: {
               progress: true,
             },
-            hot: true
+            hot: true,
+            historyApiFallback: true,
         }
     }
 }
