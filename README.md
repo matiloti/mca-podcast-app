@@ -1,7 +1,5 @@
-# mca-podcast-app
+# podcast-app
 Author: Matías Luis Lotito Ralli
-
-Technical interview for MCA
 
 To bundle the project into the `./dist` directory:
 
